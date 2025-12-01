@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETI - Erradicación del Trabajo Infantil Ambato</title>
+    
+    <!-- FUENTES E ICONOS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- TU HOJA DE ESTILOS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- ENCABEZADO -->
+    <header class="main-header">
+        <div class="container header-content">
+            <!-- Logo -->
+            <div class="logo" onclick="window.showSection('home')">
+                <div class="logo-icon">
+                    <i class="fas fa-hands-holding-child"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>ETI</h1>
+                    <p>Ambato sin Trabajo Infantil</p>
+                </div>
+            </div>
+
+            <!-- Navegación Escritorio -->
+            <nav class="desktop-nav">
+                <ul>
+                    <li><button onclick="window.showSection('home')">Inicio</button></li>
+                    <li><button onclick="window.showSection('problem')">Problemática</button></li>
+                    <li><button onclick="window.showSection('resources')">Recursos</button></li>
+                    <li><button onclick="window.showSection('shop')">Tienda</button></li>
+                    <li><button onclick="window.showSection('report')" class="btn-nav-highlight">Denunciar</button></li>
+                </ul>
+            </nav>
+
+            <!-- Iconos de Acción -->
+            <div class="header-actions">
+                <button class="btn-lang">ES / QU</button>
+                
+                <button onclick="window.toggleCart()" class="btn-icon cart-btn">
+                    <i class="fas fa-box-open"></i>
+                    <span id="cart-count">0</span>
+                </button>
+
+                <button onclick="window.showSection('login')" id="btn-login-nav" class="btn-icon">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                
+                <button class="btn-menu-mobile" onclick="document.getElementById('mobile-menu').classList.toggle('active')">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Menú Móvil -->
+        <div id="mobile-menu" class="mobile-menu">
+            <button onclick="window.showSection('home')">Inicio</button>
+            <button onclick="window.showSection('problem')">Problemática</button>
+            <button onclick="window.showSection('shop')">Tienda de Donación</button>
+            <button onclick="window.showSection('report')">Denunciar Caso</button>
+        </div>
+    </header>
+
+    <!-- BOTÓN FLOTANTE EMERGENCIA -->
+    <a href="tel:911" class="fab-emergency" title="Llamar al 911">
+        <i class="fas fa-bell"></i>
+    </a>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main>
+
+        <!-- SECCIÓN INICIO -->
+        <section id="home-section" class="section hero active">
+            <div class="hero-overlay"></div>
+            <div class="container hero-content fade-in">
+                <span class="badge">Campaña 2025</span>
+                <h1 class="hero-title">
+                    CAMBIA SU <span class="highlight-text">CONTEXTO</span><br>
+                    CAMBIA SU <span class="highlight-text">FUTURO</span>
+                </h1>
+                <p class="hero-desc">
+                    El trabajo infantil vulnera los derechos de miles de niños en Ambato. Erradicarlo es un compromiso urgente.
+                </p>
+                <div class="hero-buttons">
+                    <button onclick="window.showSection('report')" class="btn btn-primary">DENUNCIAR AHORA</button>
+                    <button onclick="window.showSection('shop')" class="btn btn-secondary">DONAR KITS</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN PROBLEMÁTICA -->
+        <section id="problem-section" class="section hidden">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">Realidad vs Mitos</span>
+                    <h2 class="section-title">¿Por qué NO es "Trabajo Formativo"?</h2>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="card-info">
+                        <h3><i class="fas fa-times-circle"></i> Mito: "Fortalece el carácter"</h3>
+                        <p>Realidad: Expone a los niños a riesgos físicos y psicológicos graves, limitando su desarrollo integral.</p>
+                    </div>
+                    <div class="card-info">
+                        <h3><i class="fas fa-times-circle"></i> Mito: "Ayuda a la familia"</h3>
+                        <p>Realidad: Perpetúa el ciclo de pobreza intergeneracional al impedir que el niño estudie.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN RECURSOS -->
+        <section id="resources-section" class="section hidden">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">Apoyo Integral</span>
+                    <h2 class="section-title">Recursos Disponibles en Ambato</h2>
+                </div>
+                <div class="grid-3">
+                    <div class="card-service">
+                        <div class="icon-box"><i class="fas fa-home"></i></div>
+                        <h4>Centros CDI</h4>
+                        <p>Atención y cuidado diario gratuito.</p>
+                    </div>
+                    <div class="card-service">
+                        <div class="icon-box"><i class="fas fa-hand-holding-heart"></i></div>
+                        <h4>Programas ETI</h4>
+                        <p>Estrategias de erradicación progresiva.</p>
+                    </div>
+                    <div class="card-service">
+                        <div class="icon-box"><i class="fas fa-user-shield"></i></div>
+                        <h4>CCPDA</h4>
+                        <p>Protección legal de derechos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN TIENDA -->
+        <section id="shop-section" class="section hidden">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">Solidaridad Efectiva</span>
+                    <h2 class="section-title">Tienda de Donación</h2>
+                    <p>Dona un Kit real que llegará a las familias de las zonas rurales prioritarias.</p>
+                </div>
+                <!-- Grid de Productos (JS lo llena) -->
+                <div id="donation-grid" class="grid-3"></div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DENUNCIA -->
+        <section id="report-section" class="section hidden">
+            <div class="container grid-2-start">
+                <div class="info-block">
+                    <div class="alert-box">
+                        <h3><i class="fas fa-phone-volume"></i> Llama al 911</h3>
+                        <p>Si ves un riesgo inminente, llama de inmediato. Es anónimo.</p>
+                        <a href="tel:911" class="btn btn-white">LLAMAR</a>
+                    </div>
+                    <h4>Pasos para reportar:</h4>
+                    <ul class="steps-list">
+                        <li><span class="step-num">1</span> Observa sin riesgo.</li>
+                        <li><span class="step-num">2</span> Ubica el lugar exacto.</li>
+                        <li><span class="step-num">3</span> Usa el formulario.</li>
+                    </ul>
+                </div>
+                <div class="form-box">
+                    <h3>Reporte Digital</h3>
+                    <form onsubmit="window.handleReport(event)">
+                        <div class="form-group">
+                            <label>Ubicación</label>
+                            <input type="text" id="report-loc" placeholder="Ej: Mercado Central" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea id="report-desc" rows="4" placeholder="Describe lo que viste..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary full-width">ENVIAR REPORTE</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN LOGIN -->
+        <section id="login-section" class="section hidden center-content">
+            <div class="login-card">
+                <div class="icon-box large"><i class="fas fa-user-shield"></i></div>
+                <h2>Acceso Voluntarios</h2>
+                <p>Ingresa para gestionar donaciones</p>
+                <form onsubmit="window.handleLogin(event)">
+                    <input type="email" placeholder="Correo electrónico" required>
+                    <input type="password" placeholder="Contraseña" required>
+                    <button class="btn btn-primary full-width">ENTRAR</button>
+                </form>
+                <div id="login-error" class="error-msg hidden">Error de conexión</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-col">
+                <h4>Contactos</h4>
+                <p>Av. Principal, Edificio CCPDA</p>
+                <p>+593 03 000 0000</p>
+                <p>contacto@eti-ambato.org</p>
+            </div>
+            <div class="footer-col">
+                <h4>Enlaces</h4>
+                <button onclick="window.showSection('home')">Inicio</button>
+                <button onclick="window.showSection('shop')">Tienda</button>
+                <button onclick="window.showSection('report')">Denuncias</button>
+            </div>
+            <div class="footer-col">
+                <h4>Síguenos</h4>
+                <div class="social-icons">
+                    <i class="fab fa-facebook"></i>
+                    <i class="fab fa-instagram"></i>
+                    <i class="fab fa-tiktok"></i>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">&copy; 2025 Campaña ETI Ambato.</div>
+    </footer>
+
+    <!-- MODAL CARRITO -->
+    <div id="cart-modal" class="modal-overlay hidden">
+        <div class="modal-content side-panel">
+            <div class="modal-header">
+                <h3>Tu Aporte</h3>
+                <button onclick="window.toggleCart()" class="close-btn">&times;</button>
+            </div>
+            <div id="cart-items" class="modal-body"></div>
+            <div class="modal-footer">
+                <div class="total-row"><span>Total:</span> <span id="cart-total">$0.00</span></div>
+                <button onclick="window.checkout()" class="btn btn-primary full-width">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ÉXITO -->
+    <div id="success-modal" class="modal-overlay hidden">
+        <div class="modal-content center-modal">
+            <div class="success-icon"><i class="fas fa-check"></i></div>
+            <h3 id="modal-title">¡Gracias!</h3>
+            <p id="modal-msg">Acción registrada.</p>
+            <button onclick="document.getElementById('success-modal').classList.add('hidden')" class="btn btn-dark">CERRAR</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
