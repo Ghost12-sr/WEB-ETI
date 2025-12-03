@@ -70,6 +70,8 @@ ul { list-style: none; }
 
 .hidden { display: none !important; }
 .active { display: block !important; }
+main > .section { display: none; }
+main > .section.active { display: block !important; }
 
 .inputGroup {
   font-family: 'Segoe UI', sans-serif;
@@ -82,7 +84,7 @@ ul { list-style: none; }
   font-size: 100%;
   padding: 0.8em;
   outline: none;
-  border: 2px solid var(--color-input-border);
+  border: 2px solid rgb(200, 200, 200);
   background-color: transparent;
   border-radius: 20px;
   width: 100%;
@@ -91,20 +93,21 @@ ul { list-style: none; }
 .inputGroup label {
   font-size: 100%;
   position: absolute;
-  left: 0;
-  padding: 0.8em;
-  margin-left: 0.5em;
+  left: 1.5em;
+  top: 0.8em;
+  padding: 0 0.4em;
   pointer-events: none;
   transition: all 0.3s ease;
-  color: var(--color-input-label);
-  background: var(--color-body-bg);
+  color: rgb(100, 100, 100);
+  background-color: transparent;
 }
 
 .inputGroup :is(input:focus, input:valid)~label {
-  transform: translateY(-50%) scale(.9);
-  margin: 0em;
-  margin-left: 1.3em;
-  padding: 0.4em;
+  top: -0.7em;
+  left: 1.3em;
+  transform: scale(.9);
+  color: rgb(150, 150, 200);
+  background-color: white;
 }
 
 .inputGroup :is(input:focus, input:valid) {
@@ -212,7 +215,7 @@ ul { list-style: none; }
     }
 }
 
-.fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+.fade-in { animation: fadeIn 0.8s ease-out forwards; }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(1.25rem); }
     to { opacity: 1; transform: translateY(0); }

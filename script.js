@@ -588,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(loader) {
             loader.classList.add('hidden');
         }
-    }, 2500);
+    }, 800);
     
     // Conectar el logo para ir al inicio
     const logo = document.querySelector('.logo');
