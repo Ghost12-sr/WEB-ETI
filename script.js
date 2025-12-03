@@ -101,8 +101,22 @@ onAuthStateChanged(auth, (user) => {
         // Mostrar nombre del usuario con botón de perfil y cerrar sesión
         if(container) {
             const userName = user.displayName || user.email.split('@')[0];
+            
+            // Función para obtener iniciales
+            const getInitials = (name) => {
+                const parts = name.trim().split(' ');
+                if(parts.length >= 2) {
+                    return `${parts[0][0]}.${parts[1][0]}.`;
+                }
+                return parts[0];
+            };
+            
+            // Detectar si es móvil
+            const isMobile = window.innerWidth <= 768;
+            const displayName = isMobile ? getInitials(userName) : `Bienvenido ${userName}`;
+            
             container.innerHTML = `
-                <button id="profile-btn" class="btn-nav-highlight">Bienvenido ${userName}</button>
+                <button id="profile-btn" class="btn-nav-highlight">${displayName}</button>
                 <button id="logout-btn" class="btn-logout-auth">Cerrar Sesión</button>
             `;
             
@@ -598,6 +612,50 @@ document.addEventListener('DOMContentLoaded', () => {
             if(e.key === 'Enter' || e.key === ' ') showSection('home');
         });
     }
+    
+    // Manejo del menú hamburguesa
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if(menuToggle) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if(mobileMenu) {
+                mobileMenu.classList.toggle('active');
+                menuToggle.classList.toggle('active');
+                // Prevenir scroll del body cuando el menú está abierto
+                if(mobileMenu.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+    }
+    
+    // Cerrar menú al hacer click en una opción
+    if(mobileMenu) {
+        mobileMenu.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                if(menuToggle) menuToggle.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
+    
+    // Cerrar menú al hacer click fuera
+    document.addEventListener('click', (e) => {
+        if(mobileMenu && menuToggle) {
+            if(!mobileMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                if(mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+    });
     
     // Conectar formularios con sus manejadores
     const loginForm = document.querySelector('form[data-form-type="login"]');
