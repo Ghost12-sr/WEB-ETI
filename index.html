@@ -15,10 +15,16 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- LOADER DE CARGA -->
+    <div id="page-loader" class="loader-wrapper hidden">
+        <div class="loader">Conectando con ETI
+            <span></span>
+        </div>
+    </div>
 
     <!-- ENCABEZADO -->
     <header class="main-header">
-        <div class="container header-content">
+        <div class="header-content">
             <!-- Logo -->
             <div class="logo" data-section="home" role="button" tabindex="0">
                 <div class="logo-icon">
@@ -50,13 +56,9 @@
                     <span id="cart-count">0</span>
                 </button>
 
-                <button data-section="login" id="btn-login-nav" class="btn-icon">
-                    <i class="fas fa-user-circle"></i>
-                </button>
-                
-                <button class="btn-menu-mobile" id="btn-menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <div id="user-auth-container">
+                    <button id="auth-btn" data-section="login" class="btn-nav-highlight">Ingresar</button>
+                </div>
             </div>
         </div>
         
@@ -220,17 +222,47 @@
                 <div class="form-box">
                     <h3>Reporte Digital</h3>
                     <form data-form-type="report">
-                        <div class="form-group">
+                        <div class="inputGroup">
+                            <input type="text" id="report-loc" placeholder=" " required>
                             <label>Ubicación</label>
-                            <input type="text" id="report-loc" placeholder="Ej: Mercado Central" required>
                         </div>
-                        <div class="form-group">
-                            <label>Descripción</label>
-                            <textarea id="report-desc" rows="4" placeholder="Describe lo que viste..." required></textarea>
+                        <div class="inputGroup">
+                            <textarea id="report-desc" rows="4" placeholder=" " required></textarea>
+                            <label>Descripción - Describe lo que viste...</label>
                         </div>
                         <button type="submit" class="btn btn-primary full-width">ENVIAR REPORTE</button>
                     </form>
                 </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN REGISTRO -->
+        <section id="register-section" class="section hidden center-content">
+            <div class="login-card">
+                <div class="icon-box large"><i class="fas fa-user-plus"></i></div>
+                <h2>Registro de Voluntarios</h2>
+                <p>Únete a nuestra comunidad para ayudar</p>
+                <form data-form-type="register">
+                    <div class="inputGroup">
+                        <input type="text" id="register-name" placeholder=" " required>
+                        <label>Nombre completo</label>
+                    </div>
+                    <div class="inputGroup">
+                        <input type="email" id="register-email" placeholder=" " required>
+                        <label>Correo electrónico</label>
+                    </div>
+                    <div class="inputGroup">
+                        <input type="password" id="register-password" placeholder=" " required>
+                        <label>Contraseña (mín. 6 caracteres)</label>
+                    </div>
+                    <div class="inputGroup">
+                        <input type="password" id="register-confirm" placeholder=" " required>
+                        <label>Confirmar contraseña</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary full-width">REGISTRARSE</button>
+                </form>
+                <p class="login-link">¿Ya tienes cuenta? <button data-section="login" class="link-btn">Inicia sesión aquí</button></p>
+                <div id="register-error" class="error-msg hidden">Error de conexión</div>
             </div>
         </section>
 
@@ -241,11 +273,38 @@
                 <h2>Acceso Voluntarios</h2>
                 <p>Ingresa para gestionar donaciones</p>
                 <form data-form-type="login">
-                    <input type="email" placeholder="Correo electrónico" required>
-                    <input type="password" placeholder="Contraseña" required>
-                    <button class="btn btn-primary full-width">ENTRAR</button>
+                    <div class="inputGroup">
+                        <input type="email" placeholder=" " required>
+                        <label>Correo electrónico</label>
+                    </div>
+                    <div class="inputGroup">
+                        <input type="password" placeholder=" " required>
+                        <label>Contraseña</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary full-width">ENTRAR</button>
                 </form>
+                <div class="divider-or">O</div>
+                <button onclick="window.handleGoogleSignIn()" class="btn btn-google full-width">
+                    <i class="fab fa-google"></i> Inicia sesión con Google
+                </button>
+                <p class="login-link">¿No tienes cuenta? <button data-section="register" class="link-btn">Regístrate aquí</button></p>
                 <div id="login-error" class="error-msg hidden">Error de conexión</div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN PERFIL DE USUARIO -->
+        <section id="profile-section" class="section hidden center-content">
+            <div class="login-card">
+                <div class="icon-box large"><i class="fas fa-user-circle"></i></div>
+                <h2 id="profile-name">Mi Perfil</h2>
+                <div class="profile-info">
+                    <p><strong>Email:</strong> <span id="profile-email">--</span></p>
+                    <p><strong>Estado:</strong> <span id="profile-status">Activo</span></p>
+                    <p><strong>Miembro desde:</strong> <span id="profile-date">--</span></p>
+                </div>
+                <div class="profile-actions">
+                    <button onclick="window.showSection('shop')" class="btn btn-primary full-width">Ir a la Tienda</button>
+                </div>
             </div>
         </section>
 
@@ -300,6 +359,54 @@
         </div>
     </div>
 
+    <!-- MODAL PAGO -->
+    <div id="payment-modal" class="modal-overlay hidden">
+        <div class="modal-content center-modal" style="max-width: 450px;">
+            <h3 style="margin-bottom: 1.5rem;">Datos de Pago</h3>
+            
+            <form onsubmit="window.processPayment(event)" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Titular de la Tarjeta</label>
+                    <input type="text" id="card-holder" placeholder="Nombre completo" required 
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem;">
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Número de Tarjeta</label>
+                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" required
+                        oninput="this.value = this.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim()"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem;">
+                </div>
+
+                <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div style="flex: 2;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Fecha de Vencimiento</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required
+                            oninput="if(this.value.length === 2) this.value += '/'"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">CVV</label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="3" required
+                            oninput="this.value = this.value.replace(/\D/g, '')"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem;">
+                    </div>
+                </div>
+
+                <div style="background: #f5f5f5; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
+                    <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem;"><strong>Total a pagar:</strong></p>
+                    <p style="margin: 0; font-size: 1.3rem; font-weight: bold; color: var(--color-red);">$<span id="payment-total">0.00</span></p>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" onclick="document.getElementById('payment-modal').classList.add('hidden')" 
+                        class="btn btn-secondary full-width">CANCELAR</button>
+                    <button type="submit" class="btn btn-primary full-width">PAGAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL ÉXITO -->
     <div id="success-modal" class="modal-overlay hidden">
         <div class="modal-content center-modal">
@@ -312,5 +419,6 @@
 
     <!-- SCRIPT -->
     <script type="module" src="script.js"></script>
+    <script type="module" src="firebase.js"></script>
 </body>
 </html>

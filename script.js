@@ -1,230 +1,660 @@
-// Estado global
+// 1. IMPORTAMOS LAS HERRAMIENTAS DESDE TU FIREBASE.JS
+import { auth, db, signInAnonymously, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, collection, addDoc, serverTimestamp } from './firebase.js';
+
+// --- ESTADO GLOBAL ---
 let currentUser = null;
 let cart = [];
 
-// Datos de kits
-const kits = [
-    { id: 1, name: "Canasta Nutrición", price: 25, desc: "Alimentos 1 semana", img: "https://images.unsplash.com/photo-1595350796339-440939eb9f8b?w=400" },
-    { id: 2, name: "Kit de Abrigo", price: 15, desc: "Ropa térmica", img: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400" },
-    { id: 3, name: "Kit Escolar", price: 10, desc: "Útiles básicos", img: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400" },
-    { id: 4, name: "Salud Básica", price: 30, desc: "Medicinas", img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400" },
-    { id: 5, name: "Juguete Didáctico", price: 12, desc: "Desarrollo cognitivo", img: "https://images.unsplash.com/photo-1596464716127-f9a862557963?w=400" },
-    { id: 6, name: "Aporte Libre", price: 5, desc: "Fondo emergencia", img: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=400" }
+// --- MODO OSCURO ---
+function initDarkMode() {
+    const darkModeBtn = document.getElementById('dark-mode-fab');
+    const savedDarkMode = localStorage.getItem('darkMode');
+    
+    console.log('initDarkMode ejecutado, botón:', darkModeBtn);
+    
+    // Aplicar modo oscuro si estaba guardado
+    if (savedDarkMode === 'enabled') {
+        document.body.classList.add('dark-mode');
+        if (darkModeBtn) {
+            const icon = darkModeBtn.querySelector('i');
+            if (icon) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                darkModeBtn.title = 'Cambiar a modo claro';
+            }
+        }
+    }
+    
+    // Escuchar clics en el botón flotante
+    if (darkModeBtn) {
+        darkModeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Click en botón de modo oscuro');
+            
+            document.body.classList.toggle('dark-mode');
+            
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+            console.log('Modo oscuro ahora es:', isDarkMode);
+            
+            // Cambiar icono
+            const icon = darkModeBtn.querySelector('i');
+            if (icon) {
+                if (isDarkMode) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    darkModeBtn.title = 'Cambiar a modo claro';
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    darkModeBtn.title = 'Cambiar a modo oscuro';
+                }
+            }
+        });
+    } else {
+        console.error('No se encontró el botón dark-mode-fab');
+    }
+}
+
+// Inicializar modo oscuro cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDarkMode);
+} else {
+    // El DOM ya está listo
+    initDarkMode();
+}
+
+// --- UTILIDADES DE LOADER ---
+function showLoader() {
+    const loader = document.getElementById('page-loader');
+    if(loader) {
+        loader.classList.remove('hidden');
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('page-loader');
+    if(loader) {
+        loader.classList.add('hidden');
+    }
+}
+
+// Lista de Productos (Kits)
+const products = [
+    { id: 1, name: "Kit Escolar Básico", price: 15.00, image: "https://images.unsplash.com/photo-1577720643272-265226b33ba0?w=400&h=300&fit=crop", desc: "Cuadernos, lápices y mochila." },
+    { id: 2, name: "Kit Alimentación", price: 25.00, image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop", desc: "Alimentos no perecibles para 1 semana." },
+    { id: 3, name: "Kit Abrigo", price: 20.00, image: "https://images.unsplash.com/photo-1551028719-00167b16ebc5?w=400&h=300&fit=crop", desc: "Chompa térmica y guantes." },
+    { id: 4, name: "Beca Transporte", price: 10.00, image: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=400&h=300&fit=crop", desc: "Pasajes para un mes de escuela." },
+    { id: 5, name: "Kit Higiene", price: 12.00, image: "https://images.unsplash.com/photo-1585021906259-c3c0ceb0f8f0?w=400&h=300&fit=crop", desc: "Jabón, pasta, cepillo y toalla." },
+    { id: 6, name: "Apoyo Legal", price: 50.00, image: "https://images.unsplash.com/photo-1553697031-d5a9f8e46bb2?w=400&h=300&fit=crop", desc: "Apoyo a procesos de restitución." }
 ];
 
-// Delegación de eventos global
-document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-section], [data-action]');
-    if (!target) return;
+// --- 2. SISTEMA DE LOGIN (Autenticación) ---
 
-    const section = target.dataset.section;
-    const action = target.dataset.action;
-
-    if (section) {
-        showSection(section);
-    }
-
-    if (action) {
-        handleAction(action);
-    }
-});
-
-// Keyboard navigation para elementos con data-section
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-        const target = e.target.closest('[data-section], [data-action]');
-        if (target && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-            target.click();
+// Escuchamos si el usuario entra o sale (Automático)
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    const container = document.getElementById('user-auth-container');
+    
+    if (user) {
+        console.log("Usuario conectado ID:", user.uid);
+        // Mostrar nombre del usuario con botón de perfil y cerrar sesión
+        if(container) {
+            const userName = user.displayName || user.email.split('@')[0];
+            container.innerHTML = `
+                <button id="profile-btn" class="btn-nav-highlight">Bienvenido ${userName}</button>
+                <button id="logout-btn" class="btn-logout-auth">Cerrar Sesión</button>
+            `;
+            
+            // Conectar eventos
+            document.getElementById('profile-btn').addEventListener('click', () => showSection('profile'));
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+        }
+        
+        // Si estaba en el login, lo mandamos a la tienda
+        const loginSection = document.getElementById('login-section');
+        if (loginSection && !loginSection.classList.contains('hidden')) {
+            showSection('shop');
+        }
+    } else {
+        console.log("Usuario desconectado");
+        if(container) {
+            container.innerHTML = '<button id="auth-btn" data-section="login" class="btn-nav-highlight">Ingresar</button>';
+            // Reconectar el evento al nuevo botón dinámico
+            const authBtn = document.getElementById('auth-btn');
+            if(authBtn) {
+                authBtn.addEventListener('click', () => showSection('login'));
+            }
         }
     }
 });
 
-// Delegación de eventos para formularios
-document.addEventListener('submit', (e) => {
-    const form = e.target;
-    const formType = form.dataset.formType;
-
-    if (formType === 'report') {
-        handleReport(e);
-    }
-    if (formType === 'login') {
-        handleLogin(e);
-    }
-});
-
-// Funciones de navegación
-function showSection(id) {
-    document.querySelectorAll('main > section').forEach(s => {
-        s.classList.remove('active');
-        s.classList.add('hidden');
-    });
-
-    const sec = document.getElementById(id + '-section');
-    if (sec) {
-        sec.classList.remove('hidden');
-        sec.classList.add('active');
+// Función para el botón "ENTRAR" del formulario
+async function handleLogin(e) {
+    if(e) e.preventDefault();
+    
+    const email = e.target.querySelector('input[type="email"]').value;
+    const password = e.target.querySelector('input[type="password"]').value;
+    const btn = e.target.querySelector('button');
+    const originalText = btn.innerText;
+    btn.innerText = "Verificando...";
+    btn.disabled = true;
+    
+    showLoader();
+    
+    try {
+        // Login con email y contraseña
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
         
-        // Reiniciar animación
-        const content = sec.querySelector('.hero-content') || sec;
-        content.classList.remove('fade-in');
-        void content.offsetWidth;
-        content.classList.add('fade-in');
-    }
+        setTimeout(() => {
+            hideLoader();
+            showModal("¡Bienvenido Voluntario!", `Hola ${user.displayName || 'Voluntario'}, has iniciado sesión correctamente.`);
+        }, 500);
 
-    // Cerrar menú móvil
-    document.getElementById('mobile-menu').classList.remove('active');
-    window.scrollTo(0, 0);
-}
-
-// Manejador de acciones
-function handleAction(action) {
-    switch (action) {
-        case 'toggle-cart':
-            toggleCart();
-            break;
-        case 'checkout':
-            checkout();
-            break;
-        case 'close-modal':
-            document.getElementById('success-modal').classList.add('hidden');
-            break;
+    } catch (error) {
+        hideLoader();
+        console.error("Error login:", error);
+        const errorDiv = document.getElementById('login-error');
+        if(errorDiv) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.innerText = "Error: " + (error.code === 'auth/user-not-found' ? 'Usuario no encontrado' : error.code === 'auth/wrong-password' ? 'Contraseña incorrecta' : error.message);
+        }
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
     }
 }
 
-// Carrito
-function toggleCart() {
-    const modal = document.getElementById('cart-modal');
-    modal.classList.toggle('hidden');
+// Función para el registro de voluntarios
+async function handleRegister(e) {
+    if(e) e.preventDefault();
+    
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm').value;
+    const errorDiv = document.getElementById('register-error');
+    const btn = e.target.querySelector('button');
+    const originalText = btn.innerText;
+    
+    // Validaciones
+    if (password.length < 6) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.innerText = "La contraseña debe tener al menos 6 caracteres.";
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.innerText = "Las contraseñas no coinciden.";
+        return;
+    }
+    
+    btn.innerText = "Registrando...";
+    btn.disabled = true;
+    
+    showLoader();
+    
+    try {
+        // Crear usuario con email y contraseña
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Actualizar perfil con el nombre
+        await updateProfile(user, {
+            displayName: name
+        });
+        
+        // Guardar información del voluntario en Firestore
+        await addDoc(collection(db, "volunteers"), {
+            uid: user.uid,
+            name: name,
+            email: email,
+            createdAt: serverTimestamp(),
+            status: "activo"
+        });
+        
+        errorDiv.classList.add('hidden');
+        e.target.reset();
+        
+        setTimeout(() => {
+            hideLoader();
+            showModal("¡Registro Exitoso!", `Bienvenido ${name}, tu cuenta ha sido creada. Ahora puedes iniciar sesión.`);
+            showSection('login');
+        }, 500);
+
+    } catch (error) {
+        hideLoader();
+        console.error("Error registro:", error);
+        errorDiv.classList.remove('hidden');
+        errorDiv.innerText = "Error: " + (error.code === 'auth/email-already-in-use' ? 'Este email ya está registrado' : error.code === 'auth/invalid-email' ? 'Email inválido' : error.message);
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+}
+
+async function handleLogout() {
+    await signOut(auth);
+    showModal("Sesión Cerrada", "Has salido del sistema.");
+    showSection('home');
+}
+
+// Función para login con Google
+async function handleGoogleSignIn() {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    
+    showLoader();
+    
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // Verificar si es un usuario nuevo (con validación segura)
+        const isNewUser = result.additionalUserInfo && result.additionalUserInfo.isNewUser ? true : false;
+        
+        if(isNewUser) {
+            // Guardar información del voluntario en Firestore si es nuevo
+            await addDoc(collection(db, "volunteers"), {
+                uid: user.uid,
+                name: user.displayName,
+                email: user.email,
+                createdAt: serverTimestamp(),
+                status: "activo",
+                provider: "google"
+            });
+            
+            setTimeout(() => {
+                hideLoader();
+                showModal("¡Bienvenido!", `Hola ${user.displayName}, tu cuenta ha sido creada exitosamente.`);
+            }, 1000);
+        } else {
+            setTimeout(() => {
+                hideLoader();
+                showModal("¡Bienvenido Voluntario!", `Hola ${user.displayName}, has iniciado sesión correctamente.`);
+            }, 1000);
+        }
+        
+        showSection('shop');
+        
+    } catch (error) {
+        hideLoader();
+        console.error("Error Google Sign-in:", error);
+        console.error("Código de error:", error.code);
+        console.error("Mensaje:", error.message);
+        
+        if(error.code !== 'auth/popup-closed-by-user') {
+            showModal("Error de Acceso", `No pudimos iniciar sesión con Google. Error: ${error.message}`);
+        }
+    }
+}
+
+// --- 3. NAVEGACIÓN (Mostrar/Ocultar secciones) ---
+
+function showSection(sectionName) {
+    // Ocultar todas
+    document.querySelectorAll('main .section').forEach(sec => {
+        sec.classList.add('hidden');
+        sec.classList.remove('active', 'fade-in');
+    });
+    
+    // Mostrar la elegida
+    const target = document.getElementById(`${sectionName}-section`);
+    if (target) {
+        target.classList.remove('hidden');
+        setTimeout(() => target.classList.add('active', 'fade-in'), 10);
+        window.scrollTo(0, 0);
+        
+        // Si es la sección de perfil, actualizar datos
+        if(sectionName === 'profile' && currentUser) {
+            updateProfileDisplay();
+        }
+    }
+    
+    // Cerrar menú móvil si está abierto
+    const mobileMenu = document.getElementById('mobile-menu');
+    if(mobileMenu) mobileMenu.classList.remove('active');
+}
+
+// Actualizar información del perfil
+function updateProfileDisplay() {
+    if(!currentUser) return;
+    
+    const name = currentUser.displayName || 'Usuario';
+    const email = currentUser.email || '--';
+    const createdDate = currentUser.metadata?.creationTime ? new Date(currentUser.metadata.creationTime).toLocaleDateString('es-ES') : '--';
+    
+    document.getElementById('profile-name').textContent = `Hola, ${name}`;
+    document.getElementById('profile-email').textContent = email;
+    document.getElementById('profile-date').textContent = createdDate;
+}
+
+// --- 4. TIENDA Y CARRITO ---
+
+function renderShop() {
+    const grid = document.getElementById('donation-grid');
+    if(!grid) return;
+
+    grid.innerHTML = products.map(p => `
+        <div class="product-card">
+            <div class="product-image">
+                <img src="${p.image}" alt="${p.name}" loading="lazy">
+            </div>
+            <div class="product-info">
+                <h4>${p.name}</h4>
+                <p>${p.desc}</p>
+                <div class="price-display">$${p.price.toFixed(2)}</div>
+                <button onclick="window.addToCart(${p.id})" class="btn-add-cart">AÑADIR</button>
+            </div>
+        </div>
+    `).join('');
 }
 
 function addToCart(id) {
-    const item = kits.find(k => k.id === id);
-    if (item) {
-        cart.push(item);
-        updateCart();
+    const product = products.find(p => p.id === id);
+    if(product) {
+        cart.push(product);
+        updateCartUI();
+        
+        // Animación pequeña en el carrito
+        const cartIcon = document.querySelector('.cart-btn i');
+        if(cartIcon) {
+            cartIcon.classList.add('fa-bounce');
+            setTimeout(() => cartIcon.classList.remove('fa-bounce'), 1000);
+        }
     }
 }
 
-function removeFromCart(idx) {
-    cart.splice(idx, 1);
-    updateCart();
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartUI();
 }
 
-function updateCart() {
-    const count = document.getElementById('cart-count');
-    const container = document.getElementById('cart-items');
-    const totalEl = document.getElementById('cart-total');
-
-    count.innerText = cart.length;
-
-    if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#999;">Carrito vacío</p>';
-        totalEl.innerText = "$0.00";
-        return;
-    }
-
-    container.innerHTML = cart.map((item, i) => `
-        <div class="cart-item">
-            <div>
-                <strong>${item.name}</strong><br>
-                <small>$${item.price}</small>
-            </div>
-            <button onclick="removeFromCart(${i})" style="color:var(--color-red); border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
-        </div>
-    `).join('');
-
-    const total = cart.reduce((a, b) => a + b.price, 0);
-    totalEl.innerText = '$' + total.toFixed(2);
-}
-
-function checkout() {
-    if (!cart.length) return;
+function updateCartUI() {
+    // Actualizar número en el icono
+    const countEl = document.getElementById('cart-count');
+    if(countEl) countEl.textContent = cart.length;
     
-    if (!currentUser) {
-        alert("Por favor inicia sesión");
-        toggleCart();
+    // Actualizar lista visual
+    const itemsEl = document.getElementById('cart-items');
+    if (itemsEl) {
+        if(cart.length === 0) {
+            itemsEl.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Tu carrito está vacío.</p>';
+        } else {
+            itemsEl.innerHTML = cart.map((item, index) => `
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #eee;">
+                    <div>
+                        <strong>${item.name}</strong>
+                        <div style="font-size:0.8rem; color:#666;">$${item.price.toFixed(2)}</div>
+                    </div>
+                    <button onclick="window.removeFromCart(${index})" style="color:red; background:none; border:none; cursor:pointer;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+    }
+    
+    // Actualizar Total
+    const totalEl = document.getElementById('cart-total');
+    if(totalEl) {
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        totalEl.textContent = `$${total.toFixed(2)}`;
+    }
+}
+
+function toggleCart() {
+    const modal = document.getElementById('cart-modal');
+    if(modal) modal.classList.toggle('hidden');
+}
+
+// --- 5. SIMULACIÓN DE COMPRA (Guardar en Base de Datos) ---
+
+async function checkout() {
+    if(cart.length === 0) return alert("El carrito está vacío.");
+    
+    if(!currentUser) {
+        toggleCart(); // Cierra carrito
+        showModal("Identificación Requerida", "Debes iniciar sesión para registrar la donación.");
         showSection('login');
         return;
     }
 
-    // Simular checkout (sin Firebase por ahora)
-    cart = [];
-    updateCart();
-    toggleCart();
-
-    document.getElementById('modal-title').innerText = "¡Donación Recibida!";
-    document.getElementById('modal-msg').innerText = "Gracias por tu solidaridad.";
-    document.getElementById('success-modal').classList.remove('hidden');
+    // Mostrar modal de pago
+    showPaymentForm();
 }
 
-// Tienda
-function initShop() {
-    const grid = document.getElementById('donation-grid');
-    if (!grid) return;
-
-    grid.innerHTML = kits.map(k => `
-        <div class="product-card">
-            <div class="product-img-box">
-                <img src="${k.img}" class="product-img">
-                <span class="price-tag">$${k.price}</span>
-            </div>
-            <div class="product-info">
-                <h4>${k.name}</h4>
-                <p>${k.desc}</p>
-                <button onclick="addToCart(${k.id})" class="btn-outline">
-                    AGREGAR
-                </button>
-            </div>
-        </div>
-    `).join('');
+function showPaymentForm() {
+    const paymentModal = document.getElementById('payment-modal');
+    if(!paymentModal) {
+        console.error('Modal de pago no encontrado');
+        return;
+    }
+    
+    // Calcular total del carrito
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const totalElement = document.getElementById('payment-total');
+    if(totalElement) {
+        totalElement.innerText = total.toFixed(2);
+    }
+    
+    // Limpiar campos del formulario
+    document.getElementById('card-number').value = '';
+    document.getElementById('card-holder').value = '';
+    document.getElementById('expiry').value = '';
+    document.getElementById('cvv').value = '';
+    
+    paymentModal.classList.remove('hidden');
 }
 
-// Formularios
-function handleLogin(e) {
+async function processPayment(e) {
     e.preventDefault();
-    currentUser = { uid: 'user-' + Date.now() };
-    showSection('home');
-    document.getElementById('login-error').classList.add('hidden');
+    
+    const cardNumber = document.getElementById('card-number').value;
+    const cardHolder = document.getElementById('card-holder').value;
+    const expiry = document.getElementById('expiry').value;
+    const cvv = document.getElementById('cvv').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    
+    // Validaciones básicas
+    if(cardNumber.replace(/\s/g, '').length !== 16) {
+        return alert('El número de tarjeta debe tener 16 dígitos');
+    }
+    if(!expiry.match(/^\d{2}\/\d{2}$/)) {
+        return alert('El formato de fecha debe ser MM/YY');
+    }
+    if(cvv.length !== 3) {
+        return alert('El CVV debe tener 3 dígitos');
+    }
+    
+    btn.innerText = "Procesando pago...";
+    btn.disabled = true;
+    
+    showLoader();
+    
+    try {
+        // Simular procesamiento de pago
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Guardar datos de la donación
+        const orderData = {
+            items: cart,
+            total: cart.reduce((sum, item) => sum + item.price, 0),
+            date: serverTimestamp(),
+            userId: currentUser.uid,
+            status: "pagado",
+            paymentMethod: "tarjeta_debito",
+            cardLast4: cardNumber.slice(-4),
+            cardHolder: cardHolder
+        };
+
+        await addDoc(collection(db, "donations"), orderData);
+
+        // Limpiar todo
+        cart = [];
+        updateCartUI();
+        toggleCart();
+        
+        // Cerrar modal de pago
+        const paymentModal = document.getElementById('payment-modal');
+        if(paymentModal) paymentModal.classList.add('hidden');
+        
+        // Limpiar formulario
+        e.target.reset();
+        
+        // Mostrar éxito
+        hideLoader();
+        showModal("¡Pago Exitoso!", `Se ha procesado tu donación de $${orderData.total.toFixed(2)} exitosamente. ¡Gracias por tu aporte!`);
+
+    } catch (error) {
+        hideLoader();
+        console.error("Error al procesar pago:", error);
+        showModal("Error en el Pago", "Hubo un problema al procesar tu pago. Por favor intenta de nuevo.");
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 }
 
-function handleReport(e) {
-    e.preventDefault();
+// --- 6. REPORTES (Denuncias) ---
 
+async function handleReport(e) {
+    if(e) e.preventDefault();
+    
     const loc = document.getElementById('report-loc').value;
     const desc = document.getElementById('report-desc').value;
+    const btn = e.target.querySelector('button');
+    
+    if(btn) {
+        btn.innerText = "Enviando...";
+        btn.disabled = true;
+    }
 
-    if (loc && desc) {
+    showLoader();
+
+    try {
+        await addDoc(collection(db, "reports"), {
+            location: loc,
+            description: desc,
+            date: serverTimestamp(),
+            status: "nuevo"
+        });
+
         e.target.reset();
+        hideLoader();
+        showModal("Reporte Recibido", "Gracias por alertarnos. La información es anónima.");
 
-        document.getElementById('modal-title').innerText = "Reporte Enviado";
-        document.getElementById('modal-msg').innerText = "Tu denuncia anónima ha sido registrada.";
-        document.getElementById('success-modal').classList.remove('hidden');
+    } catch (error) {
+        hideLoader();
+        console.error("Error reporte:", error);
+        alert("Error al enviar.");
+    } finally {
+        if(btn) {
+            btn.innerText = "ENVIAR REPORTE";
+            btn.disabled = false;
+        }
     }
 }
 
-// Inicialización
-window.addEventListener('DOMContentLoaded', () => {
-    initShop();
+// --- UTILIDADES ---
+
+function showModal(title, msg) {
+    const t = document.getElementById('modal-title');
+    const m = document.getElementById('modal-msg');
+    const modal = document.getElementById('success-modal');
     
-    // Menú móvil
-    const btnMenuToggle = document.getElementById('btn-menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
+    if(t) t.textContent = title;
+    if(m) m.textContent = msg;
+    if(modal) modal.classList.remove('hidden');
+}
+
+// Inicializar la tienda al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    // Mostrar loader
+    const loader = document.getElementById('page-loader');
+    if(loader) {
+        loader.classList.remove('hidden');
+    }
     
-    if (btnMenuToggle && mobileMenu) {
-        btnMenuToggle.addEventListener('click', () => {
-            mobileMenu.classList.toggle('active');
-        });
+    // Simular tiempo de carga
+    setTimeout(() => {
+        renderShop();
         
-        // Cerrar menú al hacer clic en un botón del menú
-        mobileMenu.addEventListener('click', (e) => {
-            if (e.target.dataset.section) {
-                mobileMenu.classList.remove('active');
-            }
+        // Ocultar loader después del tiempo de carga
+        if(loader) {
+            loader.classList.add('hidden');
+        }
+    }, 2500);
+    
+    // Conectar el logo para ir al inicio
+    const logo = document.querySelector('.logo');
+    if(logo) {
+        logo.addEventListener('click', () => showSection('home'));
+        logo.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter' || e.key === ' ') showSection('home');
         });
     }
+    
+    // Conectar formularios con sus manejadores
+    const loginForm = document.querySelector('form[data-form-type="login"]');
+    if(loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    
+    const registerForm = document.querySelector('form[data-form-type="register"]');
+    if(registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+    }
+    
+    const reportForm = document.querySelector('form[data-form-type="report"]');
+    if(reportForm) {
+        reportForm.addEventListener('submit', handleReport);
+    }
+    
+    // Conectar todos los botones con data-section
+    document.querySelectorAll('button[data-section]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const section = btn.getAttribute('data-section');
+            if(section) showSection(section);
+        });
+    });
+    
+    // Manejador para el botón del carrito
+    document.querySelectorAll('button[data-action="toggle-cart"]').forEach(btn => {
+        btn.addEventListener('click', toggleCart);
+    });
+    
+    // Manejador para el botón CONFIRMAR (checkout)
+    document.querySelectorAll('button[data-action="checkout"]').forEach(btn => {
+        btn.addEventListener('click', checkout);
+    });
+    
+    // Manejador para cerrar el modal
+    document.querySelectorAll('button[data-action="close-modal"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = document.getElementById('success-modal');
+            if(modal) modal.classList.add('hidden');
+        });
+    });
 });
 
-// Exposer funciones para atributos onclick que quedan
+// --- ¡ESTO ES CRUCIAL! ---
+// Exponemos las funciones para que el HTML pueda verlas
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.handleLogout = handleLogout;
+window.handleGoogleSignIn = handleGoogleSignIn;
+window.showSection = showSection;
+window.updateProfileDisplay = updateProfileDisplay;
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
+window.toggleCart = toggleCart;
+window.checkout = checkout;
+window.processPayment = processPayment;
+window.handleReport = handleReport;
+window.showLoader = showLoader;
+window.hideLoader = hideLoader;
