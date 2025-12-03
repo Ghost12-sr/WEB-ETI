@@ -8,7 +8,7 @@
     <!-- FUENTES E ICONOS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- TU HOJA DE ESTILOS -->
@@ -20,7 +20,7 @@
     <header class="main-header">
         <div class="container header-content">
             <!-- Logo -->
-            <div class="logo" onclick="window.showSection('home')">
+            <div class="logo" data-section="home" role="button" tabindex="0">
                 <div class="logo-icon">
                     <i class="fas fa-hands-holding-child"></i>
                 </div>
@@ -33,11 +33,11 @@
             <!-- Navegación Escritorio -->
             <nav class="desktop-nav">
                 <ul>
-                    <li><button onclick="window.showSection('home')">Inicio</button></li>
-                    <li><button onclick="window.showSection('problem')">Problemática</button></li>
-                    <li><button onclick="window.showSection('resources')">Recursos</button></li>
-                    <li><button onclick="window.showSection('shop')">Tienda</button></li>
-                    <li><button onclick="window.showSection('report')" class="btn-nav-highlight">Denunciar</button></li>
+                    <li><button data-section="home">Inicio</button></li>
+                    <li><button data-section="problem">Problemática</button></li>
+                    <li><button data-section="resources">Recursos</button></li>
+                    <li><button data-section="shop">Tienda</button></li>
+                    <li><button data-section="report" class="btn-nav-highlight">Denunciar</button></li>
                 </ul>
             </nav>
 
@@ -45,16 +45,16 @@
             <div class="header-actions">
                 <button class="btn-lang">ES / QU</button>
                 
-                <button onclick="window.toggleCart()" class="btn-icon cart-btn">
+                <button data-action="toggle-cart" class="btn-icon cart-btn">
                     <i class="fas fa-box-open"></i>
                     <span id="cart-count">0</span>
                 </button>
 
-                <button onclick="window.showSection('login')" id="btn-login-nav" class="btn-icon">
+                <button data-section="login" id="btn-login-nav" class="btn-icon">
                     <i class="fas fa-user-circle"></i>
                 </button>
                 
-                <button class="btn-menu-mobile" onclick="document.getElementById('mobile-menu').classList.toggle('active')">
+                <button class="btn-menu-mobile" id="btn-menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -62,10 +62,10 @@
         
         <!-- Menú Móvil -->
         <div id="mobile-menu" class="mobile-menu">
-            <button onclick="window.showSection('home')">Inicio</button>
-            <button onclick="window.showSection('problem')">Problemática</button>
-            <button onclick="window.showSection('shop')">Tienda de Donación</button>
-            <button onclick="window.showSection('report')">Denunciar Caso</button>
+            <button data-section="home">Inicio</button>
+            <button data-section="problem">Problemática</button>
+            <button data-section="shop">Tienda de Donación</button>
+            <button data-section="report">Denunciar Caso</button>
         </div>
     </header>
 
@@ -90,8 +90,8 @@
                     El trabajo infantil vulnera los derechos de miles de niños en Ambato. Erradicarlo es un compromiso urgente.
                 </p>
                 <div class="hero-buttons">
-                    <button onclick="window.showSection('report')" class="btn btn-primary">DENUNCIAR AHORA</button>
-                    <button onclick="window.showSection('shop')" class="btn btn-secondary">DONAR KITS</button>
+                    <button data-section="report" class="btn btn-primary">DENUNCIAR AHORA</button>
+                    <button data-section="shop" class="btn btn-secondary">DONAR KITS</button>
                 </div>
             </div>
         </section>
@@ -99,19 +99,63 @@
         <!-- SECCIÓN PROBLEMÁTICA -->
         <section id="problem-section" class="section hidden">
             <div class="container">
-                <div class="section-header">
-                    <span class="section-subtitle">Realidad vs Mitos</span>
-                    <h2 class="section-title">¿Por qué NO es "Trabajo Formativo"?</h2>
+                <!-- ¿QUÉ ES TRABAJO INFANTIL? -->
+                <div class="problem-block red-bg">
+                    <h2>¿QUÉ ES TRABAJO INFANTIL?</h2>
+                    <p>El trabajo infantil es cualquier tipo de actividades que afectan su salud, educación o desarrollo. Es una forma de explotación que les roba su infancia y limita sus oportunidades.</p>
                 </div>
-                
-                <div class="grid-2">
-                    <div class="card-info">
-                        <h3><i class="fas fa-times-circle"></i> Mito: "Fortalece el carácter"</h3>
-                        <p>Realidad: Expone a los niños a riesgos físicos y psicológicos graves, limitando su desarrollo integral.</p>
+
+                <!-- ¿QUÉ ES MENDICIDAD INFANTIL? -->
+                <div class="problem-block red-bg">
+                    <h2>¿QUÉ ES MENDICIDAD INFANTIL?</h2>
+                    <p>La mendicidad infantil es cuando niños y niñas son llevados a pedir dinero en las calles, exponiéndolos a riesgos y privándolos de una vida digna y segura. Erradicarla es esencial para proteger sus derechos</p>
+                </div>
+
+                <!-- MITOS vs REALIDAD -->
+                <div class="myth-reality-section">
+                    <h2 class="section-center-title">Mitos vs Realidad</h2>
+                    <p class="section-center-text">Existen muchos mitos que justifican el trabajo infantil, pero la realidad es que afecta la salud, educación y futuro de los niños. Aclarar estas ideas es clave para comprender el problema y combatirlo.</p>
+                    
+                    <div class="myth-reality-grid">
+                        <div class="myth-column">
+                            <h3>Mito</h3>
+                            <ul>
+                                <li>El trabajo es bueno para la familia</li>
+                                <li>Trabajar fortalece su carácter.</li>
+                                <li>Mientras no sea peligroso, está bien.</li>
+                                <li>Los niños prefieren trabajar antes que estudiarA mayoria trabaja por necesidad, no por elección.</li>
+                            </ul>
+                        </div>
+                        <div class="reality-column">
+                            <h3>Realidad</h3>
+                            <ul>
+                                <li>El trabajo infantil perpetúa la pobreza.</li>
+                                <li>Los expone a riesgos que afectan su desarrollo.</li>
+                                <li>Todo trabajo infantil afecta sus derechos.</li>
+                                <li>La mayoría trabaja por necesidad, no por elección.</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="card-info">
-                        <h3><i class="fas fa-times-circle"></i> Mito: "Ayuda a la familia"</h3>
-                        <p>Realidad: Perpetúa el ciclo de pobreza intergeneracional al impedir que el niño estudie.</p>
+                </div>
+
+                <!-- DATOS ACTUALES EN AMBATO -->
+                <div class="data-section teal-bg">
+                    <h2>DATOS ACTUALES EN AMBATO</h2>
+                    <p>En Ambato, el trabajo infantil sigue siendo una realidad preocupante. En 2022 se registró un 3.4% de niños trabajando en las calles, y en 2023 se identificaron 982 casos entre trabajo infantil y mendicidad. Parroquias como San Fernando, Santa Rosa, Constantino Fernández y Unamuncho destacan como zonas emisoras. Aunque el MIES continúa con sus programas.</p>
+                </div>
+
+                <!-- HISTORIAS ILUSTRADAS TESTIMONIALES -->
+                <div class="testimonials-section">
+                    <h2>HISTORIAS ILUSTRADAS TESTIMONIALES</h2>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card">
+                            <p><strong>Mi infancia en algo distinto.</strong></p>
+                            <p>Encontré ayuda cuando más la necesitaba.</p>
+                        </div>
+                        <div class="testimonial-card">
+                            <p><strong>Dejar las calles cambió mi futuro.</strong></p>
+                            <p>Un pequeño apoyo hizo una gran diferencia.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -175,7 +219,7 @@
                 </div>
                 <div class="form-box">
                     <h3>Reporte Digital</h3>
-                    <form onsubmit="window.handleReport(event)">
+                    <form data-form-type="report">
                         <div class="form-group">
                             <label>Ubicación</label>
                             <input type="text" id="report-loc" placeholder="Ej: Mercado Central" required>
@@ -196,7 +240,7 @@
                 <div class="icon-box large"><i class="fas fa-user-shield"></i></div>
                 <h2>Acceso Voluntarios</h2>
                 <p>Ingresa para gestionar donaciones</p>
-                <form onsubmit="window.handleLogin(event)">
+                <form data-form-type="login">
                     <input type="email" placeholder="Correo electrónico" required>
                     <input type="password" placeholder="Contraseña" required>
                     <button class="btn btn-primary full-width">ENTRAR</button>
@@ -212,26 +256,33 @@
         <div class="container footer-content">
             <div class="footer-col">
                 <h4>Contactos</h4>
-                <p>Av. Principal, Edificio CCPDA</p>
-                <p>+593 03 000 0000</p>
-                <p>contacto@eti-ambato.org</p>
+                <p>Dirección: Av. Principal</p>
+                <p>Edificio CCPDA</p>
+                <p>Teléfono: +593 000 0000</p>
+                <p>Correo:</p>
+                <p>contacto@campaña.org</p>
             </div>
             <div class="footer-col">
-                <h4>Enlaces</h4>
-                <button onclick="window.showSection('home')">Inicio</button>
-                <button onclick="window.showSection('shop')">Tienda</button>
-                <button onclick="window.showSection('report')">Denuncias</button>
+                <h4>Enlaces Rápidos</h4>
+                <p>Inicio</p>
+                <p>Sobre de la campaña</p>
+                <p>Cómo ayudar</p>
+                <p>Denunciar casos</p>
+                <p>Programas y proyectos</p>
+                <p>Co ínfacto</p>
             </div>
             <div class="footer-col">
-                <h4>Síguenos</h4>
-                <div class="social-icons">
-                    <i class="fab fa-facebook"></i>
-                    <i class="fab fa-instagram"></i>
-                    <i class="fab fa-tiktok"></i>
-                </div>
+                <h4>Responsabilidad</h4>
+                <p>Protegemos a la niñez porque demostrar es el futuro de la sociedad. Cada acción, cada voz, cada cabeza, ayuda a prevenir el trabajo infantil y a...</p>
+            </div>
+            <div class="footer-social">
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-tiktok"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
-        <div class="copyright">&copy; 2025 Campaña ETI Ambato.</div>
+        <div class="copyright">&copy; 2025 Campaña por la Niñez. Todos los derechos reservados.<br>Este sitio promueve la defensa, protección y bienestar de los niños y niñas.</div>
     </footer>
 
     <!-- MODAL CARRITO -->
@@ -239,12 +290,12 @@
         <div class="modal-content side-panel">
             <div class="modal-header">
                 <h3>Tu Aporte</h3>
-                <button onclick="window.toggleCart()" class="close-btn">&times;</button>
+                <button data-action="toggle-cart" class="close-btn">&times;</button>
             </div>
             <div id="cart-items" class="modal-body"></div>
             <div class="modal-footer">
                 <div class="total-row"><span>Total:</span> <span id="cart-total">$0.00</span></div>
-                <button onclick="window.checkout()" class="btn btn-primary full-width">CONFIRMAR</button>
+                <button data-action="checkout" class="btn btn-primary full-width">CONFIRMAR</button>
             </div>
         </div>
     </div>
@@ -255,7 +306,7 @@
             <div class="success-icon"><i class="fas fa-check"></i></div>
             <h3 id="modal-title">¡Gracias!</h3>
             <p id="modal-msg">Acción registrada.</p>
-            <button onclick="document.getElementById('success-modal').classList.add('hidden')" class="btn btn-dark">CERRAR</button>
+            <button data-action="close-modal" class="btn btn-dark">CERRAR</button>
         </div>
     </div>
 
