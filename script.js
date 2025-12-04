@@ -257,6 +257,15 @@ async function handleLogout() {
 
 // Función para login con Google
 async function handleGoogleSignIn() {
+    // Cerrar menú móvil si está abierto
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuToggle = document.getElementById('menu-toggle');
+    if(mobileMenu && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
+        if(menuToggle) menuToggle.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
     const provider = new GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
