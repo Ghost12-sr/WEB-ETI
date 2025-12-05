@@ -95,25 +95,30 @@ const products = [
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
     const container = document.getElementById('user-auth-container');
+    const mobileLogoutBtn = document.getElementById('btn-mobile-logout');
     
     if (user) {
         console.log("Usuario conectado ID:", user.uid);
+        
+        // --- LÓGICA MÓVIL: Mostrar opción de cerrar sesión en menú ---
+        if(mobileLogoutBtn) {
+            mobileLogoutBtn.classList.remove('hidden');
+            mobileLogoutBtn.onclick = handleLogout;
+        }
+
         // Mostrar nombre del usuario con botón de perfil y cerrar sesión
         if(container) {
             const userName = user.displayName || user.email.split('@')[0];
             
-            // Función para obtener iniciales
-            const getInitials = (name) => {
+            // Función para obtener el primer nombre
+            const getFirstName = (name) => {
                 const parts = name.trim().split(' ');
-                if(parts.length >= 2) {
-                    return `${parts[0][0]}.${parts[1][0]}.`;
-                }
                 return parts[0];
             };
             
             // Detectar si es móvil
             const isMobile = window.innerWidth <= 768;
-            const displayName = isMobile ? getInitials(userName) : `Bienvenido ${userName}`;
+            const displayName = isMobile ? getFirstName(userName) : `Bienvenido ${userName}`;
             
             container.innerHTML = `
                 <button id="profile-btn" class="btn-nav-highlight">${displayName}</button>
@@ -132,6 +137,12 @@ onAuthStateChanged(auth, (user) => {
         }
     } else {
         console.log("Usuario desconectado");
+        
+        // --- LÓGICA MÓVIL: Ocultar opción de cerrar sesión ---
+        if(mobileLogoutBtn) {
+            mobileLogoutBtn.classList.add('hidden');
+        }
+
         if(container) {
             container.innerHTML = '<button id="auth-btn" data-section="login" class="btn-nav-highlight">Ingresar</button>';
             // Reconectar el evento al nuevo botón dinámico
@@ -253,6 +264,11 @@ async function handleLogout() {
     await signOut(auth);
     showModal("Sesión Cerrada", "Has salido del sistema.");
     showSection('home');
+    
+    // Cerrar menú móvil si estaba abierto
+    const mobileMenu = document.getElementById('mobile-menu');
+    if(mobileMenu) mobileMenu.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 // Función para login con Google
